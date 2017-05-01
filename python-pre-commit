@@ -1,8 +1,11 @@
 #!/bin/bash
 
+# This code is intended to be used as part of a submodule called git-hooks.
+
 # To make git run unit tests and lint tests, softlink this file into the
-# .git/hooks directory.  The following command will get that done:
-#   ln -s ../../pre-commit .git/hooks/pre-commit
+# .git/hooks directory of the repo you want to test.  The following command will
+# get that done:
+#   ln -s ../../git-hooks/pre-commit .git/hooks/pre-commit
 
 # Run unit tests
 COVERAGE=coverage
@@ -15,7 +18,7 @@ if ! $COVERAGE run --source='.' -m unittest discover --pattern='*_test.py'; then
 fi
 
 # Run everything through the linter
-pylint --rcfile=pylintrc \
+pylint --rcfile=git-hooks/pylintrc \
        --output-format=colorized \
        --reports=n \
        $(git ls-files | grep '\.py$')

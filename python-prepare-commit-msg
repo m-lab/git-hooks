@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This code is intended to be used as part of a submodule called git-hooks.
+
 # prepare-commit-msg is a shell script that gets called by git with the temp
 # filename of the future commit message as its first argument. Its purpose is
 # to edit that file in order to make the commit message better/more complete.
@@ -13,7 +15,7 @@
 #
 # To make git run this script, softlink this file into the .git/hooks
 # directory.  The following command will get that done:
-#   ln -s ../../prepare-commit-msg .git/hooks/prepare-commit-msg
+#   ln -s ../../git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
 #
 # This module does not run the tests, it just outputs the saved information
 # from past test runs. This is okay for the github flow because the tests are
@@ -33,7 +35,7 @@ PYTHONFILES=$(git ls-files | grep '\.py$')
   $COVERAGE report -m
   echo
   echo 'The Python linter found the following issues:'
-  pylint --rcfile=pylintrc --reports=n ${PYTHONFILES}
+  pylint --rcfile=git-hooks/pylintrc --reports=n ${PYTHONFILES}
   echo
   echo 'A selection of Python formatters recommend the following changes:'
   echo '  unify :'
