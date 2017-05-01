@@ -15,7 +15,7 @@
 #
 # To make git run this script, softlink this file into the .git/hooks
 # directory.  The following command will get that done:
-#   ln -s ../../git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+#   ln -s ../../git-hooks/python-prepare-commit-msg .git/hooks/prepare-commit-msg
 #
 # This module does not run the tests, it just outputs the saved information
 # from past test runs. This is okay for the github flow because the tests are

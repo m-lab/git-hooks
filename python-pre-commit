@@ -5,7 +5,7 @@
 # To make git run unit tests and lint tests, softlink this file into the
 # .git/hooks directory of the repo you want to test.  The following command will
 # get that done:
-#   ln -s ../../git-hooks/pre-commit .git/hooks/pre-commit
+#   ln -s ../../git-hooks/python-pre-commit .git/hooks/pre-commit
 
 # Run unit tests
 COVERAGE=coverage
