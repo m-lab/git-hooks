@@ -28,7 +28,7 @@ if [[ -z $(which $COVERAGE) ]]; then
   COVERAGE=python-coverage
 fi
 
-PYTHONFILES=$(git ls-files | grep '\.py$')
+PYTHONFILES=$(find . -name \*.py)
 
 (
   echo 'Test coverage is as follows:'
