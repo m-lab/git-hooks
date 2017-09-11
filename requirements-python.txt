@@ -1,0 +1,6 @@
+autoflake
+autopep8
+coveralls
+docformatter
+pylint
+unify
