@@ -29,18 +29,18 @@ set -x
     if which travis; then
       travis lint -x
     else
-      echo "No travis binary available for linting"
+      echo ".travis.yml found but no travis binary available for linting"
     fi
   fi
 
   # If there is any .yml code, lint it.
   if git ls-files | grep -q '\.yml$'; then
-    echo "You have .yml files but no YML linter chosen yet"
+    echo "You have .yml files but no YML linter chosen (yet)"
   fi
 
   # If there is any .json code, lint it.
   if git ls-files | grep -q '\.json$'; then
-    echo "You have json files but no JSON linter chosen yet"
+    echo "You have json files but no JSON linter chosen (yet)"
   fi
 
   # If there is any python code, run either the repo's custom
