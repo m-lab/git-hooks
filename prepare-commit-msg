@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# This code is intended to be used as part of a submodule called git-hooks.
+
+# prepare-commit-msg is a shell script that gets called by git with the temp
+# filename of the future commit message as its first argument. Its purpose is
+# to edit that file in order to make the commit message better/more complete.
+#
+# It runs code coverage and runs the linter and a bunch of formatters over the
+# code, and then appends the output of those tools as comments at the bottom of
+# the commit message.  However, it can also be run without a command-line
+# argument, just in case you want to see what its output is going to be without
+# running "git commit". In that case, we do the same things, but we don't
+# append anything to a file.
+#
+# To make git run this script, softlink this file into the .git/hooks
+# directory.  The following command will get that done:
+#   ln -s ../../git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+#
+# We expect that the PWD for this code is the root of the repo using git-hooks
+# as a submodule.
+
+set -e -u -x -o pipefail
+
+# We use short options for common commands because some users of this module use
+# the busybox versions of some of these commands, and those only support short
+# options.
+
+(
+  # If there is a .travis.yml file, lint it in a special way.
+  if git ls-files | grep -q '^\.travis\.yml$'; then
+    if which travis; then
+      travis lint -x
+    else
+      echo ".travis.yml found but no travis binary available for linting"
+    fi
+  fi
+
+  # If there is any .yml code, lint it.
+  if git ls-files | grep -q '\.yml$'; then
+    echo "You have .yml files but no YML linter chosen (yet)"
+  fi
+
+  # If there is any .json code, lint it.
+  if git ls-files | grep -q '\.json$'; then
+    echo "You have json files but no JSON linter chosen (yet)"
+  fi
+
+  # If there is any python code, run either the repo's custom
+  # python-prepare-commit-msg script or run the git-hooks
+  # python-prepare-commit-msg script.
+  if git ls-files | grep -q '\.py$'; then
+    if [[ -x ./python-prepare-commit-msg ]]; then
+      ./python-prepare-commit-msg
+    elif [[ -x ./git-hooks/python-prepare-commit-msg ]]; then
+      ./git-hooks/python-prepare-commit-msg
+    else
+      echo "No python-prepare-commit-msg found, but one should exist." 1>&2
+      false
+    fi
+  fi
+
+  # If there is go code, run either the repo's custom go prepare-commit-msg
+  # script or run a very generic go linter.
+  if git ls-files | grep -q '\.go$'; then
+    if [[ -x ./go-prepare-commit-msg ]]; then
+      ./go-prepare-commit-msg
+    else
+      echo "The go linter found the following issues:"
+      golint ./...
+    fi
+  fi
+) | (
+  # If a filename argument was passed in, comment all output and append it to
+  # that file.  Otherwise just allow the output of the above commands to go to
+  # stdout.
+  if [[ -n "$1" ]]; then
+    sed -e 's/^/# /' >> $1
+  else
+    cat -
+  fi
+)

@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# This code is intended to be used as part of a submodule called git-hooks.
-
-# To make git run unit tests and lint tests, softlink this file into the
-# .git/hooks directory of the repo you want to test.  The following command will
-# get that done:
-#   ln -s ../../git-hooks/python-pre-commit .git/hooks/pre-commit
+# This file runs test coverage and looks for lint errors in python code. It is
+# intended to be used as part of a submodule called git-hooks.
+#
+# You probably don't want to use this file directly unless you are doing
+# something clever and custom. Instead, you should prefer to have this file
+# called from the pre-commit script if there is python code under source
+# control. See the header of that script for more information.
 
 # Run unit tests
 COVERAGE=coverage
