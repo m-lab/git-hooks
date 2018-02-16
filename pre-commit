@@ -13,23 +13,23 @@ set -x
 set -u
 
 # If there is a .travis.yml file, lint it in a special way.
-if git ls-files | grep --quiet '^\.travis\.yml$'; then
+if git ls-files | grep -q '^\.travis\.yml$'; then
   travis lint -x
 fi
 
 # If there is any .yml code, lint it.
-if git ls-files | grep --quiet '\.yml$'; then
+if git ls-files | grep -q '\.yml$'; then
   echo "No YML linter chosen yet"
 fi
 
 # If there is any .json code, lint it.
-if git ls-files | grep --quiet '\.json$'; then
+if git ls-files | grep -q '\.json$'; then
   echo "No JSON linter chosen yet"
 fi
 
 # If there is any python code, run either the repo's custom python pre-commit
 # script or run the git-hooks python pre-commit script.
-if git ls-files | grep --quiet '\.py$'; then
+if git ls-files | grep -q '\.py$'; then
   if [[ -x ./python-pre-commit ]]; then
     ./python-pre-commit
   elif [[ -x ./git-hooks/python-pre-commit ]]; then
@@ -42,7 +42,7 @@ fi
 
 # If there is go code, run either the repo's custom go pre-commit script or run
 # a very generic go pre-commit script.
-if git ls-files | grep --quiet '\.go$'; then
+if git ls-files | grep -q '\.go$'; then
   if [[ -x ./go-pre-commit ]]; then
     ./go-pre-commit
   else
