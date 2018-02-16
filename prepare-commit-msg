@@ -16,8 +16,11 @@
 # To make git run this script, softlink this file into the .git/hooks
 # directory.  The following command will get that done:
 #   ln -s ../../git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+#
+# We expect that the PWD for this code is the root of the repo using git-hooks
+# as a submodule.
 
-set -x
+set -e -u -x -o pipefail
 
 # We use short options for common commands because some users of this module use
 # the busybox versions of some of these commands, and those only support short
