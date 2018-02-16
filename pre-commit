@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# This code is intended to be used as part of a submodule called git-hooks.  It
+# is a language agnostic tester and linter, and should lint, test, and run
+# coverage for any and all languages you happen to use.
+#
+# To make git run unit tests and lint tests, softlink this file into the
+# .git/hooks directory of the repo you want to test.  The following command will
+# get that done:
+#   ln -s ../../git-hooks/pre-commit .git/hooks/pre-commit
+
+set -x
+set -u
+
+# If there is a .travis.yml file, lint it in a special way.
+if git ls-files | grep --quiet '^\.travis\.yml$'; then
+  travis lint -x
+fi
+
+# If there is any .yml code, lint it.
+if git ls-files | grep --quiet '\.yml$'; then
+  echo "No YML linter chosen yet"
+fi
+
+# If there is any .json code, lint it.
+if git ls-files | grep --quiet '\.json$'; then
+  echo "No JSON linter chosen yet"
+fi
+
+# If there is any python code, run either the repo's custom python pre-commit
+# script or run the git-hooks python pre-commit script.
+if git ls-files | grep --quiet '\.py$'; then
+  if [[ -x ./python-pre-commit ]]; then
+    ./python-pre-commit
+  elif [[ -x ./git-hooks/python-pre-commit ]]; then
+    ./git-hooks/python-pre-commit
+  else
+    echo "No python pre-commit found, but one should exist." 1>&2
+    false
+  fi
+fi
+
+# If there is go code, run either the repo's custom go pre-commit script or run
+# a very generic go pre-commit script.
+if git ls-files | grep --quiet '\.go$'; then
+  if [[ -x ./go-pre-commit ]]; then
+    ./go-pre-commit
+  else
+    go build ./...
+    go test ./...
+  fi
+fi
