@@ -4,5 +4,4 @@ coveralls
 docformatter
 pylint
 pylint-mccabe
-travis
 unify
