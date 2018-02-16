@@ -17,7 +17,11 @@ set -x
 
 # If there is a .travis.yml file, lint it in a special way.
 if git ls-files | grep -q '^\.travis\.yml$'; then
-  travis lint -x
+  if which travis; then
+    travis lint -x
+  else
+    echo "No travis binary available for syntax checking"
+  fi
 fi
 
 # If there is any .yml code, lint it.
