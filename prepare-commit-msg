@@ -75,15 +75,23 @@ set -e -u -x -o pipefail
   # #!/bin/bash), then run shellcheck if you can.
   if (git ls-files | grep -q '\.sh$') || \
       (git ls-files | while read; do
-        head -n1 $REPLY
+        if [[ -f $REPLY ]]; then
+          head -n1 $REPLY
+        fi
       done | grep -q '^#!/bin/bash\b'); then
     if which shellcheck; then
+      # Shellcheck exits with a non-zero error code if it finds any warnings,
+      # which is a bad thing in a linter. So we briefly turn off the -e option.
+      set +e
       (
         git ls-files | grep -q '\.sh$'
         git ls-files | while read; do
-          (head -n1 $REPLY | grep -q '^#!/bin/bash\b') && echo "${REPLY}"
+          if [[ -f $REPLY ]] && (head -n1 $REPLY | grep -q '^#!/bin/bash\b'); then
+            echo "${REPLY}"
+          fi
         done
       ) | xargs shellcheck
+      set -e
     else
       echo "Shell files found but shellcheck not installed"
     fi
