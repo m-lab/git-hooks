@@ -19,10 +19,11 @@ if ! $COVERAGE run --source='.' -m unittest discover --pattern='*_test.py'; then
 fi
 
 # Run everything through the linter
-pylint --rcfile=git-hooks/pylintrc \
-       --output-format=colorized \
-       --reports=n \
-       $(git ls-files | grep '\.py$')
+git ls-files | grep '\.py$' \
+  | xargs pylint \
+      --rcfile=git-hooks/pylintrc \
+      --output-format=colorized \
+      --reports=n
 # pylint return codes described here:
 #   https://lists.logilab.org/pipermail/python-projects/2009-November/002068.html
 # We only care about fatal messages and errors, the existence of which are
