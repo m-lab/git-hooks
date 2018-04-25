@@ -70,11 +70,29 @@ set -e -u -x -o pipefail
       golint ./...
     fi
   fi
+
+  # If there is shell code (files ending in .sh or files with the first line
+  # #!/bin/bash), then run shellcheck if you can.
+  if (git ls-files | grep -q '\.sh$') || \
+      (git ls-files | while read; do
+        head -n1 $REPLY
+      done | grep -q '^#!/bin/bash\b'); then
+    if which shellcheck; then
+      (
+        git ls-files | grep -q '\.sh$'
+        git ls-files | while read; do
+          (head -n1 $REPLY | grep -q '^#!/bin/bash\b') && echo "${REPLY}"
+        done
+      ) | xargs shellcheck
+    else
+      echo "Shell files found but shellcheck not installed"
+    fi
+  fi
 ) | (
   # If a filename argument was passed in, comment all output and append it to
   # that file.  Otherwise just allow the output of the above commands to go to
   # stdout.
-  if [[ -n "$1" ]]; then
+  if [[ $# -gt 0 ]]; then
     sed -e 's/^/# /' >> $1
   else
     cat -
