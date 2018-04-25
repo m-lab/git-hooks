@@ -71,12 +71,20 @@ set -e -u -x -o pipefail
     fi
   fi
 ) | (
-  # If a filename argument was passed in, comment all output and append it to
-  # that file.  Otherwise just allow the output of the above commands to go to
-  # stdout.
-  if [[ -n "$1" ]]; then
-    sed -e 's/^/# /' >> $1
+  if [[ $# -gt 0 ]]; then
+    # If arguments were passed in, assume we were invoked by a call to git.
+    if [[ "$2" != message ]]; then
+      # If this is not a call from 'git -m', then append the output to the file
+      # commented out so that the user can edit the resulting file to show or
+      # hide the output message.
+      sed -e 's/^/# /' >> "$1"
+    else
+      # If this is a call from 'git -m', send the output to stderr and don't
+      # mess up the prepared message.
+      sed -e 's/^/# /' 1>&2
+    fi
   else
+    # If no filename argument was passed in, then just act as a pass-through.
     cat -
   fi
 )
