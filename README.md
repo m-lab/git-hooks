@@ -11,3 +11,9 @@ to test.  The following commands will get that done:
 
 # Python requirements
 `$ [sudo] pip install -r requirements-python.txt`
+
+# Currently supported languages for linting
+
+- Python
+- Go
+- Shell

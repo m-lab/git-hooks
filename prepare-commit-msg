@@ -26,6 +26,23 @@ set -e -u -x -o pipefail
 # the busybox versions of some of these commands, and those only support short
 # options.
 
+# Shellfiles is a helper function to list all files written in shell.
+# Frequently shell scripts are given filenames that don't end in .sh, but we
+# would still like to fnd those files for checking.
+shellfiles() {
+  (
+    git ls-files | grep -q '\.sh$'
+    git ls-files | while read -r; do
+      if [[ -f $REPLY ]] && (head -n1 "${REPLY}" | grep -q '^#!/bin/bash\b'); then
+        echo "${REPLY}"
+      fi
+    done
+  ) | sort -u
+}
+
+# Go through each kind of file we might create a message for, and create a
+# message for all files of that type.  Send the output of this process to the
+# right place, depending on the arguments with which this script was invoked.
 (
   # If there is a .travis.yml file, lint it in a special way.
   if git ls-files | grep -q '^\.travis\.yml$'; then
@@ -70,10 +87,28 @@ set -e -u -x -o pipefail
       golint ./...
     fi
   fi
+
+  # If there is shell code (files ending in .sh or files with the first line
+  # #!/bin/bash), then run shellcheck if you can.
+  if [[ -n $(shellfiles) ]] ; then
+    if which shellcheck > /dev/null; then
+      # Shellcheck exits with a non-zero error code if it finds any warnings,
+      # which is a bad thing in a linter, but we can't change it. So we briefly
+      # turn off the -e option, because we want errors from shellcheck to be
+      # non-fatal to the prepare-commit-msg script.
+      echo "Output of shellcheck:"
+      set +e
+      shellfiles | xargs shellcheck
+      set -e
+      echo "shellcheck complete"
+    else
+      echo "Shell files found but shellcheck not installed"
+    fi
+  fi
 ) | (
   if [[ $# -gt 0 ]]; then
     # If arguments were passed in, assume we were invoked by a call to git.
-    if [[ "$2" == message ]]; then
+    if [[ $# -gt 1 ]] && [[ "$2" == message ]]; then
       # If this is a call from 'git -m', send the output to stderr and don't
       # mess up the prepared message.
       sed -e 's/^/# /' 1>&2
