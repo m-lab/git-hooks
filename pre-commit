@@ -29,7 +29,11 @@ fi
 
 # If there is any .yml code, lint it.
 if git ls-files | grep -q '\.yml$'; then
-  echo "No YML linter chosen yet"
+  if which yamllint; then
+    git ls-files | grep '\.yml$' | xargs yamllint
+  else
+    echo ".yml files are present but yamllint is not"
+  fi
 fi
 
 # If there is any .json code, lint it.
