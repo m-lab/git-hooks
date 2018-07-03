@@ -30,7 +30,10 @@ fi
 # If there is any .yml code, lint it.
 if git ls-files | grep -q '\.yml$'; then
   if which yamllint; then
-    git ls-files | grep '\.yml$' | xargs yamllint
+    # Use the relaxed linter mode as a starter. The default mode is too noisy on
+    # all our existing files, and the conversation about what we want to care about
+    # has not yet happened.
+    git ls-files | grep '\.yml$' | xargs yamllint -d relaxed
   else
     echo ".yml files are present but yamllint is not"
   fi
