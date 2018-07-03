@@ -55,7 +55,14 @@ shellfiles() {
 
   # If there is any .yml code, lint it.
   if git ls-files | grep -q '\.yml$'; then
-    echo "You have .yml files but no YML linter chosen (yet)"
+    if which yamllint; then
+      # Use the relaxed linter mode as a starter. The default mode is too noisy on
+      # all our existing files, and the conversation about what we want to care about
+      # has not yet happened.
+      git ls-files | grep '\.yml$' | xargs yamllint -d relaxed
+    else
+      echo ".yml files are present but yamllint is not"
+    fi
   fi
 
   # If there is any .json code, lint it.
