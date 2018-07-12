@@ -47,7 +47,10 @@ shellfiles() {
   # If there is a .travis.yml file, lint it in a special way.
   if git ls-files | grep -q '^\.travis\.yml$'; then
     if which travis > /dev/null; then
-      travis lint -x
+      if [[ "$(travis lint -x)" != "valid" ]]; then
+        echo "Travis linter found a problem:"
+        travis lint -x
+      fi
     else
       echo ".travis.yml found but no travis binary available for linting"
     fi
@@ -96,8 +99,20 @@ EOF
     if [[ -x ./go-prepare-commit-msg ]]; then
       ./go-prepare-commit-msg
     else
-      echo "The go linter found the following issues:"
-      golint ./...
+      OUTPUT="$(golint ./... && go vet ./...)"
+      if [[ -n ${OUTPUT} ]]; then
+        cat <<EOF
+golint and go vet found the following issues:
+${OUTPUT}
+EOF
+      fi
+      FILES="$(git ls-files | grep '\.go$' | xargs gofmt -l)"
+      if [[ -n ${FILES} ]]; then
+        for f in ${FILES}; do
+          echo "gofmt diff for $f:"
+          gofmt -d "$f"
+        done
+      fi
     fi
   fi
 
