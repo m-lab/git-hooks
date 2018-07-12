@@ -96,8 +96,20 @@ EOF
     if [[ -x ./go-prepare-commit-msg ]]; then
       ./go-prepare-commit-msg
     else
-      echo "The go linter found the following issues:"
-      golint ./...
+      OUTPUT="$(golint ./... && go vet ./...)"
+      if [[ -n ${OUTPUT} ]]; then
+        cat <<EOF
+golint and go vet found the following issues:
+${OUTPUT}
+EOF
+      fi
+      FILES="$(git ls-files | grep '\.go$' | xargs gofmt -l)"
+      if [[ -n ${FILES} ]]; then
+        for f in ${FILES}; do
+          echo "gofmt diff for $f:"
+          gofmt -d "$f"
+        done
+      fi
     fi
   fi
 
