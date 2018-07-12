@@ -47,7 +47,10 @@ shellfiles() {
   # If there is a .travis.yml file, lint it in a special way.
   if git ls-files | grep -q '^\.travis\.yml$'; then
     if which travis > /dev/null; then
-      travis lint -x
+      if [[ "$(travis lint -x)" != "valid" ]]; then
+        echo "Travis linter found a problem:"
+        travis lint -x
+      fi
     else
       echo ".travis.yml found but no travis binary available for linting"
     fi
