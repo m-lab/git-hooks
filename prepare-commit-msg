@@ -106,11 +106,11 @@ golint and go vet found the following issues:
 ${OUTPUT}
 EOF
       fi
-      FILES="$(git ls-files | grep '\.go$' | xargs gofmt -l)"
+      FILES="$(git ls-files | grep '\.go$' | xargs gofmt -s -l)"
       if [[ -n ${FILES} ]]; then
         for f in ${FILES}; do
           echo "gofmt diff for $f:"
-          gofmt -d "$f"
+          gofmt -s -d "$f"
         done
       fi
     fi
