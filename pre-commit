@@ -20,7 +20,9 @@ set -e -u -x -o pipefail
 
 # If there is a .travis.yml file, lint it in a special way.
 if git ls-files | grep -q '^\.travis\.yml$'; then
-  if which travis; then
+  if [[ -x ./travis-pre-commit ]]; then
+    ./travis-pre-commit
+  elif which travis; then
     travis lint -x
   else
     echo "No travis binary available for syntax checking"
@@ -29,11 +31,14 @@ fi
 
 # If there is any .yml code, lint it.
 if git ls-files | grep -q '\.yml$'; then
-  if which yamllint; then
+  if [[ -x ./yaml-pre-commit ]]; then
+    ./yaml-pre-commit
+  elif which yamllint; then
     # Use the relaxed linter mode as a starter. The default mode is too noisy on
     # all our existing files, and the conversation about what we want to care about
     # has not yet happened.
     git ls-files | grep '\.yml$' | xargs yamllint -d relaxed
+    true
   else
     echo ".yml files are present but yamllint is not"
   fi
@@ -41,7 +46,9 @@ fi
 
 # If there is any .json code, lint it.
 if git ls-files | grep -q '\.json$'; then
-  if which jsonlint; then
+  if [[ -x ./json-pre-commit ]]; then
+    ./json-pre-commit
+  elif which jsonlint; then
     git ls-files | grep '\.json$' | xargs jsonlint -q
   else
     echo ".json files are present but jsonlint is not."

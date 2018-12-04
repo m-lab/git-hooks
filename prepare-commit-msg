@@ -49,7 +49,7 @@ shellfiles() {
     if which travis > /dev/null; then
       if [[ "$(travis lint -x)" != "valid" ]]; then
         echo "Travis linter found a problem:"
-        travis lint -x
+        travis lint -x || true
       fi
     else
       echo ".travis.yml found but no travis binary available for linting"
@@ -62,7 +62,7 @@ shellfiles() {
       # Use the relaxed linter mode as a starter. The default mode is too noisy on
       # all our existing files, and the conversation about what we want to care about
       # has not yet happened.
-      OUTPUT="$(git ls-files | grep '\.yml$' | xargs yamllint -d relaxed)"
+      OUTPUT="$(git ls-files | grep '\.yml$' | (xargs yamllint -d relaxed || true))"
       if [[ -n ${OUTPUT} ]]; then
         cat <<EOF
 yamllint output:
@@ -79,7 +79,7 @@ EOF
     if which jsonlint; then
       OUTPUT=""
       git ls-files | grep '\.json$' | while read JSONFILE; do
-        FILE_OUTPUT=$(diff "${JSONFILE}" <(jsonlint "${JSONFILE}")
+        FILE_OUTPUT=$(diff "${JSONFILE}" <(jsonlint "${JSONFILE}" || true) || true)
         if [[ -n ${FILE_OUTPUT} ]]; then
           OUTPUT="${OUTPUT} jsonlint reports a diff for ${JSONFILE}:\n${FILE_OUTPUT}\n"
         fi
@@ -100,7 +100,7 @@ EOF
   # python-prepare-commit-msg script.
   if git ls-files | grep -q '\.py$'; then
     if [[ -x ./python-prepare-commit-msg ]]; then
-      ./python-prepare-commit-msg
+      ./python-prepare-commit-msg || true
     elif [[ -x ./git-hooks/python-prepare-commit-msg ]]; then
       ./git-hooks/python-prepare-commit-msg
     else
@@ -115,7 +115,7 @@ EOF
     if [[ -x ./go-prepare-commit-msg ]]; then
       ./go-prepare-commit-msg
     else
-      OUTPUT="$(golint ./... && go vet ./...)"
+      OUTPUT="$((golint ./... || true) && (go vet ./... || true))"
       if [[ -n ${OUTPUT} ]]; then
         cat <<EOF
 golint and go vet found the following issues:
