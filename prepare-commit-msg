@@ -43,6 +43,12 @@ shellfiles() {
 # Go through each kind of file we might create a message for, and create a
 # message for all files of that type.  Send the output of this process to the
 # right place, depending on the arguments with which this script was invoked.
+#
+# Some of the linters might exit with a non-zero error code, but we don't care.
+# Halting the submit is what pre-commit is for.  If we made it to running this
+# script then the codebase should be regarded as okay for submission.
+# Therefore, commands which may potentially fail have a '|| true' after them to
+# avoid them from halting the submission process.
 (
   # If there is a .travis.yml file, lint it in a special way.
   if git ls-files | grep -q '^\.travis\.yml$'; then
