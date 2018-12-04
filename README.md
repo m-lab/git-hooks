@@ -17,3 +17,5 @@ to test.  The following commands will get that done:
 - Python
 - Go
 - Shell
+- YAML
+- JSON
