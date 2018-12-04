@@ -91,6 +91,18 @@ EOF
     elif which jsonlint; then
       OUTPUT=""
       git ls-files | grep '\.json$' | while read JSONFILE; do
+        # jsonlint has no mode where it just reports problems. Instead, it
+        # reformats every input file and prints the reformatted file out on
+        # stdout (it has an option to rearrange keys in object literals, which
+        # is off by default and we are not currently using).  If it encounters
+        # an unparseable file, then it errors out.
+        #
+        # To minimize output we only report the diff between the jsonlint output
+        # and the input .json file.
+        #
+        # We use the erroring-out behavior in pre-commit, but here we want to
+        # not use it here and also not use the behavior of diff, which by
+        # default reports a non-zero error code when the inputs differ.
         FILE_OUTPUT=$(diff "${JSONFILE}" <(jsonlint "${JSONFILE}" || true) || true)
         if [[ -n ${FILE_OUTPUT} ]]; then
           OUTPUT="${OUTPUT} jsonlint reports a diff for ${JSONFILE}:\n${FILE_OUTPUT}\n"
