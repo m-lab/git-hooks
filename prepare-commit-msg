@@ -28,7 +28,7 @@ set -e -u -x -o pipefail
 
 # Shellfiles is a helper function to list all files written in shell.
 # Frequently shell scripts are given filenames that don't end in .sh, but we
-# would still like to fnd those files for checking.
+# would still like to find those files for checking.
 shellfiles() {
   (
     git ls-files | grep -q '\.sh$'
@@ -43,13 +43,21 @@ shellfiles() {
 # Go through each kind of file we might create a message for, and create a
 # message for all files of that type.  Send the output of this process to the
 # right place, depending on the arguments with which this script was invoked.
+#
+# Some of the linters might exit with a non-zero error code, but we don't care.
+# Halting the submit is what pre-commit is for.  If we made it to running this
+# script then the codebase should be regarded as okay for submission.
+# Therefore, commands which may potentially fail have a '|| true' after them to
+# avoid them from halting the submission process.
 (
   # If there is a .travis.yml file, lint it in a special way.
   if git ls-files | grep -q '^\.travis\.yml$'; then
-    if which travis > /dev/null; then
+    if [[ -x ./travis-prepare-commit-msg ]]; then
+      ./travis-prepare-commit-msg
+    elif which travis > /dev/null; then
       if [[ "$(travis lint -x)" != "valid" ]]; then
         echo "Travis linter found a problem:"
-        travis lint -x
+        travis lint -x || true
       fi
     else
       echo ".travis.yml found but no travis binary available for linting"
@@ -58,11 +66,13 @@ shellfiles() {
 
   # If there is any .yml code, lint it.
   if git ls-files | grep -q '\.yml$'; then
-    if which yamllint > /dev/null; then
+    if [[ -x ./yaml-prepare-commit-msg ]]; then
+      ./yaml-prepare-commit-msg
+    elif which yamllint > /dev/null; then
       # Use the relaxed linter mode as a starter. The default mode is too noisy on
       # all our existing files, and the conversation about what we want to care about
       # has not yet happened.
-      OUTPUT="$(git ls-files | grep '\.yml$' | xargs yamllint -d relaxed)"
+      OUTPUT="$(git ls-files | grep '\.yml$' | (xargs yamllint -d relaxed || true))"
       if [[ -n ${OUTPUT} ]]; then
         cat <<EOF
 yamllint output:
@@ -76,7 +86,37 @@ EOF
 
   # If there is any .json code, lint it.
   if git ls-files | grep -q '\.json$'; then
-    echo "You have json files but no JSON linter chosen (yet)"
+    if [[ -x ./json-prepare-commit-msg ]]; then
+      ./json-prepare-commit-msg
+    elif which jsonlint; then
+      OUTPUT=""
+      git ls-files | grep '\.json$' | while read JSONFILE; do
+        # jsonlint has no mode where it just reports problems. Instead, it
+        # reformats every input file and prints the reformatted file out on
+        # stdout (it has an option to rearrange keys in object literals, which
+        # is off by default and we are not currently using).  If it encounters
+        # an unparseable file, then it errors out.
+        #
+        # To minimize output we only report the diff between the jsonlint output
+        # and the input .json file.
+        #
+        # We use the erroring-out behavior in pre-commit, but here we want to
+        # not use it here and also not use the behavior of diff, which by
+        # default reports a non-zero error code when the inputs differ.
+        FILE_OUTPUT=$(diff "${JSONFILE}" <(jsonlint "${JSONFILE}" || true) || true)
+        if [[ -n ${FILE_OUTPUT} ]]; then
+          OUTPUT="${OUTPUT} jsonlint reports a diff for ${JSONFILE}:\n${FILE_OUTPUT}\n"
+        fi
+      done
+      if [[ -n ${OUTPUT} ]]; then
+        cat <<EOF
+jsonlint:
+${OUTPUT}
+EOF
+      fi
+    else
+      echo ".json files are present but jsonlint is not."
+    fi
   fi
 
   # If there is any python code, run either the repo's custom
@@ -99,7 +139,7 @@ EOF
     if [[ -x ./go-prepare-commit-msg ]]; then
       ./go-prepare-commit-msg
     else
-      OUTPUT="$(golint ./... && go vet ./...)"
+      OUTPUT="$(golint ./... || true; go vet ./... || true)"
       if [[ -n ${OUTPUT} ]]; then
         cat <<EOF
 golint and go vet found the following issues:
@@ -119,7 +159,9 @@ EOF
   # If there is shell code (files ending in .sh or files with the first line
   # #!/bin/bash), then run shellcheck if you can.
   if [[ -n $(shellfiles) ]] ; then
-    if which shellcheck > /dev/null; then
+    if [[ -x ./shell-prepare-commit-msg ]]; then
+      ./shell-prepare-commit-msg
+    elif which shellcheck > /dev/null; then
       # Shellcheck exits with a non-zero error code if it finds any warnings,
       # which is a bad thing in a linter, but we can't change it. So we briefly
       # turn off the -e option, because we want errors from shellcheck to be
