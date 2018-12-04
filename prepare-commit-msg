@@ -28,7 +28,7 @@ set -e -u -x -o pipefail
 
 # Shellfiles is a helper function to list all files written in shell.
 # Frequently shell scripts are given filenames that don't end in .sh, but we
-# would still like to fnd those files for checking.
+# would still like to find those files for checking.
 shellfiles() {
   (
     git ls-files | grep -q '\.sh$'
@@ -76,7 +76,23 @@ EOF
 
   # If there is any .json code, lint it.
   if git ls-files | grep -q '\.json$'; then
-    echo "You have json files but no JSON linter chosen (yet)"
+    if which jsonlint; then
+      OUTPUT=""
+      git ls-files | grep '\.json$' | while read JSONFILE; do
+        FILE_OUTPUT=$(diff "${JSONFILE}" <(jsonlint "${JSONFILE}")
+        if [[ -n ${FILE_OUTPUT} ]]; then
+          OUTPUT="${OUTPUT} jsonlint reports a diff for ${JSONFILE}:\n${FILE_OUTPUT}\n"
+        fi
+      done
+      if [[ -n ${OUTPUT} ]]; then
+        cat <<EOF
+jsonlint:
+${OUTPUT}
+EOF
+      fi
+    else
+      echo ".json files are present but jsonlint is not."
+    fi
   fi
 
   # If there is any python code, run either the repo's custom

@@ -41,7 +41,11 @@ fi
 
 # If there is any .json code, lint it.
 if git ls-files | grep -q '\.json$'; then
-  echo "No JSON linter chosen yet"
+  if which jsonlint; then
+    git ls-files | grep '\.json$' | xargs jsonlint -q
+  else
+    echo ".json files are present but jsonlint is not."
+  fi
 fi
 
 # If there is any python code, run either the repo's custom python-pre-commit
