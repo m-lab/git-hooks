@@ -100,7 +100,7 @@ EOF
   # python-prepare-commit-msg script.
   if git ls-files | grep -q '\.py$'; then
     if [[ -x ./python-prepare-commit-msg ]]; then
-      ./python-prepare-commit-msg || true
+      ./python-prepare-commit-msg
     elif [[ -x ./git-hooks/python-prepare-commit-msg ]]; then
       ./git-hooks/python-prepare-commit-msg
     else
@@ -115,7 +115,7 @@ EOF
     if [[ -x ./go-prepare-commit-msg ]]; then
       ./go-prepare-commit-msg
     else
-      OUTPUT="$((golint ./... || true) && (go vet ./... || true))"
+      OUTPUT="$(golint ./... || true; go vet ./... || true)"
       if [[ -n ${OUTPUT} ]]; then
         cat <<EOF
 golint and go vet found the following issues:
