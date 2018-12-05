@@ -65,14 +65,16 @@ shellfiles() {
   fi
 
   # If there is any .yml code, lint it.
-  if git ls-files | grep -q '\.yml$'; then
+  # The regex is slightly complicated because sometimes the files are .yml and
+  # sometimes they are .yaml.
+  if git ls-files | grep -q '\.ya\?ml$'; then
     if [[ -x ./yaml-prepare-commit-msg ]]; then
       ./yaml-prepare-commit-msg
     elif which yamllint > /dev/null; then
       # Use the relaxed linter mode as a starter. The default mode is too noisy on
       # all our existing files, and the conversation about what we want to care about
       # has not yet happened.
-      OUTPUT="$(git ls-files | grep '\.yml$' | (xargs yamllint -d relaxed || true))"
+      OUTPUT="$(git ls-files | grep '\.ya\?ml$' | (xargs yamllint -d relaxed || true))"
       if [[ -n ${OUTPUT} ]]; then
         cat <<EOF
 yamllint output:
@@ -80,7 +82,7 @@ ${OUTPUT}
 EOF
       fi
     else
-      echo ".yml files are present but yamllint is not"
+      echo "YAML files are present but yamllint is not"
     fi
   fi
 
