@@ -181,7 +181,7 @@ EOF
       ./shell-prepare-commit-msg
     else
       git ls-files | grep 'Dockerfile$' | (while read; do
-        docker run --rm -i hadolint/hadolint --ignore DL3018 < ${REPLY} || true;
+        docker run --rm -i hadolint/hadolint < ${REPLY} || true;
       done)
     fi
   fi
