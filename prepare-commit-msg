@@ -175,6 +175,16 @@ EOF
       echo "Shell files found but shellcheck not installed"
     fi
   fi
+
+  if git ls-files | grep -q 'Dockerfile$'; then
+    if [[ -x ./shell-prepare-commit-msg ]]; then
+      ./shell-prepare-commit-msg
+    else
+      git ls-files | grep 'Dockerfile$' | (while read; do
+        docker run --rm -i hadolint/hadolint < ${REPLY} || true;
+      done)
+    fi
+  fi
 ) | (
   if [[ $# -gt 0 ]]; then
     # If arguments were passed in, assume we were invoked by a call to git.
