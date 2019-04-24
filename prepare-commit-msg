@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This code is intended to be used as in a directory called git-hooks.
+# This code is intended to be used in a directory called git-hooks.
 
 # prepare-commit-msg is a shell script that gets called by git with the temp
 # filename of the future commit message as its first argument. Its purpose is

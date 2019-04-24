@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This code is intended to be used as in a directory called git-hooks.  It
+# This code is intended to be used in a directory called git-hooks.  It
 # is a language agnostic tester and linter, and should lint, test, and run
 # coverage for any and all languages you happen to use.
 #
