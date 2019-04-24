@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This code is intended to be used as part of a submodule called git-hooks.
+# This code is intended to be used as in a directory called git-hooks.
 
 # prepare-commit-msg is a shell script that gets called by git with the temp
 # filename of the future commit message as its first argument. Its purpose is
@@ -14,11 +14,11 @@
 # append anything to a file.
 #
 # To make git run this script, softlink this file into the .git/hooks
-# directory.  The following command will get that done:
-#   ln -s ../../git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+# directory. Assuming you have git-hooks checked out into your home directory,
+# the following command will get that done:
+#   ln -s ${HOME}/git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
 #
-# We expect that the PWD for this code is the root of the repo using git-hooks
-# as a submodule.
+# We expect that the PWD for this code is the root of the repo.
 
 set -e -u -x -o pipefail
 

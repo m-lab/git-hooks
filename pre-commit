@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# This code is intended to be used as part of a submodule called git-hooks.  It
+# This code is intended to be used as in a directory called git-hooks.  It
 # is a language agnostic tester and linter, and should lint, test, and run
 # coverage for any and all languages you happen to use.
 #
 # To make git run unit tests and lint tests, softlink this file into the
-# .git/hooks directory of the repo you want to test.  The following command will
+# .git/hooks directory of the repo you want to test.  Assuming you have
+# git-hooks checked out into your home directory, the following command will
 # get that done:
-#   ln -s ../../git-hooks/pre-commit .git/hooks/pre-commit
+#   ln -s ${HOME}/git-hooks/pre-commit .git/hooks/pre-commit
 #
-# We expect that the PWD for this code is the root of the repo using git-hooks
-# as a submodule.
+# We expect that the PWD for this code is the root of the repo.
 
 set -e -u -x -o pipefail
 
