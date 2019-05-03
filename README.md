@@ -5,8 +5,8 @@ To make git run unit tests and lint tests, softlink the `pre-commit` and
 `prepare-commit-msg` files into the `.git/hooks directory` of the repo you want
 to test.  The following commands will get that done:
 ```bash
-  ln --symbolic --force ../../git-hooks/pre-commit .git/hooks/pre-commit
-  ln --symbolic --force ../../git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
+  ln --symbolic --force ${HOME}/git-hooks/pre-commit .git/hooks/pre-commit
+  ln --symbolic --force ${HOME}/git-hooks/prepare-commit-msg .git/hooks/prepare-commit-msg
 ```
 
 # Python requirements
