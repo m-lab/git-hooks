@@ -76,6 +76,6 @@ if git ls-files | grep -q '\.go$'; then
     # We call both build and test to ensure that packages that have no tests
     # will at least be built.
     go build ./...
-    go test ./... -race
+    go test ./... -race -cover=1
   fi
 fi
